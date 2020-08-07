@@ -9,34 +9,44 @@ const gameModes = require('./maps/mapList.json');
 
 const client = new Discord.Client();
 
+let map = defaultMap;
+let timeLimit = defaultTimeLimit;
+
 const job = new cron.CronJob(cronJb, () => {
-    createGame();
-    // console.log(findGameMode("world"));
+    createGame(map, timeLimit);
 });
 
-const createGame = (map = defaultMap, timeLimit = defaultTimeLimit) => {
+const changeDailyParams = (newMap, newTime) => {
+    map = newMap;
+    timeLimit = newTime;
+}
+
+const createGame = (map, timeLimit) => {
     client.login(discordToken).then(async () => {
+        try {
+            const gameMode = findGameMode(map);
 
-        const gameMode = findGameMode(map);
+            const body = {
+                "map": gameMode.id,
+                "timeLimit": parseInt(timeLimit)
+            };
 
-        const body = {
-            "map": gameMode.id,
-            "timeLimit": gameMode.timeLimit
-        };
+            const { token } = await fetch('https://www.geoguessr.com/api/v3/challenges', {
+                method: 'post',
+                body: JSON.stringify(body),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': '_ncfa=' + ncfaToken
+                }
+            }).then(res => res.json());
 
-        const { token } = await fetch('https://www.geoguessr.com/api/v3/challenges', {
-            method: 'post',
-            body: JSON.stringify(body),
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': '_ncfa=' + ncfaToken
-            }
-        }).then(res => res.json())
-
-        const geoChannel = client.channels.cache.get(channelId);
-        const link = "https://www.geoguessr.com/challenge/" + token;
-        geoChannel.send(gameMode.name + " " + gameMode.timeLimit/60 + "min " + (gameMode.timeLimit%60 !== 0 ? gameMode.timeLimit% + "sec" : ""));
-        geoChannel.send(link);
+            const geoChannel = client.channels.cache.get(channelId);
+            const link = "https://www.geoguessr.com/challenge/" + token;
+            geoChannel.send(gameMode.name + " " + (body.timeLimit > 60 ? Math.floor(body.timeLimit/60)+ "min " : "") + (body.timeLimit%60 !== 0 ? body.timeLimit%60 + "sec" : ""));
+            geoChannel.send(link);
+        } catch (e) {
+            console.log('Error : ' + e);
+        }
     });
 }
 
@@ -45,15 +55,26 @@ const findGameMode = (command) => {
 }
 
 client.on('message', message => {
-    console.log("oui");
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const commands = args.shift().toLowerCase();
-    console.log(commands)
+    const args = message.content.slice(prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
 
-    // ...
+    if (command === 'play') {
+        switch (args.length) {
+            case 2:
+                createGame(args[0], args[1]);
+                break;
+            default:
+                break;
+        }
+    }
+    else if (command === 'settings' && args.length === 2) {
+        changeDailyParams(args[0], args[1]);
+    }
 });
+
+client.login(discordToken);
 
 job.start();
 

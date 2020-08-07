@@ -2,35 +2,30 @@
   {
     "command": "world",
     "id": "world",
-    "name": "World",
-    "timeLimit": 300
+    "name": "World"
   },
 
   {
     "command": "geobettr",
     "id": "59e940ed39d855c868104b32",
-    "name": "GeoBettr World",
-    "timeLimit": 300
+    "name": "GeoBettr World"
   },
 
   {
     "command": "eu",
     "id": "european-union",
-    "name": "European Union",
-    "timeLimit": 240
+    "name": "European Union"
   },
 
   {
     "command": "france",
     "id": "france",
-    "name": "France",
-    "timeLimit": 240
+    "name": "France"
   },
 
   {
     "command": "france500k",
     "id": "5b0d907bfaa4cf3ce43bc6b1",
-    "name": "France 500k",
-    "timeLimit": 180
+    "name": "France 500k"
   }
 ]
