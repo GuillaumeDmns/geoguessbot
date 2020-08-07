@@ -1,3 +1,8 @@
 {
-  "channelId": "741233846783311912"
+  "channelId": "741233846783311912",
+  "cronJb": "0 13 14 * * *",
+  "cronJbDev": "0/5 * * * * *",
+  "defaultTimeLimit": 300,
+  "defaultMap": "world",
+  "prefix": "!"
 }
